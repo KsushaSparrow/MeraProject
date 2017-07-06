@@ -7,7 +7,9 @@ package com.example.ksusha.tetris;
 public class Figure {
     int[][] positions;
     int xVel = 0;
-    int yVel = 7;
+    int yVel = 5;
+    int middle;
+    int cellSize;
 
     public void speedUpByUser(int delta){
         yVel += delta;
