@@ -4,7 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#000000"
     tools:context="com.example.ksusha.tetris.GameOver">
+
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:src="@drawable/tetris1"
+        android:scaleType="centerCrop"/>
 
     <RelativeLayout
         android:layout_width="368dp"
@@ -25,6 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="GAME OVER"
+            android:textColor="#FFFFFF"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="8dp"
             ></TextView>

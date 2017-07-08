@@ -5,6 +5,7 @@ package com.example.ksusha.tetris;
  */
 
 public class T extends Figure {
+    int stateTurned = 0;
     public T(int middle, int cellSize){
         this.middle = middle;
         this.cellSize = cellSize;
@@ -21,6 +22,38 @@ public class T extends Figure {
 
     @Override
     public void turn(){
-
+        if (stateTurned==0){
+            positions[0][0] += cellSize;
+            positions[1][0] += cellSize;
+            positions[0][2] += cellSize;
+            positions[1][2] -= cellSize;
+            positions[0][3] -= cellSize;
+            positions[1][3] += cellSize;
+            stateTurned = 1;
+        } else if (stateTurned==1) {
+            positions[0][0] -= cellSize;
+            positions[1][0] += cellSize;
+            positions[0][2] += cellSize;
+            positions[1][2] += cellSize;
+            positions[0][3] -= cellSize;
+            positions[1][3] -= cellSize;
+            stateTurned = 2;
+        } else if (stateTurned==2) {
+            positions[0][0] -= cellSize;
+            positions[1][0] -= cellSize;
+            positions[0][2] -= cellSize;
+            positions[1][2] += cellSize;
+            positions[0][3] += cellSize;
+            positions[1][3] -= cellSize;
+            stateTurned = 3;
+        } else if (stateTurned == 3) {
+            positions[0][0] += cellSize;
+            positions[1][0] -= cellSize;
+            positions[0][2] -= cellSize;
+            positions[1][2] -= cellSize;
+            positions[0][3] += cellSize;
+            positions[1][3] += cellSize;
+            stateTurned = 0;
+        }
     }
 }

@@ -12,11 +12,15 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Random;
 
-public class MovementView extends SurfaceView implements SurfaceHolder.Callback {
+public class MovementView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
 
     private Matrix translate;
     private GestureDetector gestures;
@@ -26,7 +30,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
     enum Figures {L,O,T,Z,S,J,I};
     enum Colors {RED, BLUE, GREEN, YELLOW};
     ArrayList<Coordinate> filledCells = new ArrayList<Coordinate>(0);
-    ArrayList<Coordinate> highestCells = new ArrayList<Coordinate>(0);
+    HashMap<Integer, Integer> values = new HashMap<Integer, Integer>(0);
+
 
     private int width;
     private int height;
@@ -50,11 +55,63 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     @Override
+    public boolean onTouch(View v, MotionEvent event){
+        return gestures.onTouchEvent(event);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event){
         return gestures.onTouchEvent(event);
     }
 
-    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener{
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+        private final static int SWIPE_THRESHOLD = 100;
+        private final static int SWIPE_VELOCITY_THRESHOLD = 100;
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            boolean result = false;
+            try {
+                float diffY = e2.getY() - e1.getY();
+                float diffX = e2.getX() - e1.getX();
+                if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (diffX > 0) {
+                        onSwipeRight();
+                    } else{
+                            onSwipeLeft();
+                        }
+                        result = true;
+                } else if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (diffY > 0) {
+                        onSwipeBottom();
+                    } else {
+                        onSwipeTop();
+                    }
+                    result = true;
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+            return result;
+        }
+
+    //add check
+    public  void onSwipeRight() {
+        for (int i = 0; i < figure.positions[0].length; i++)
+            figure.positions[0][i] += cellSize;
+    }
+    //add check
+    public void onSwipeLeft() {
+        for (int i = 0; i < figure.positions[0].length; i++)
+            figure.positions[0][i] -= cellSize;
+    }
+    public void onSwipeBottom() {
+        figure.yVel += 20;
+    }
+    public void onSwipeTop() {
+    }
+
         @Override
         public boolean onSingleTapConfirmed(MotionEvent event){
             boolean reachedFilledCell = reachedFilledCell(figure, 0);
@@ -120,7 +177,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
 
     @Override
     protected void onDraw(Canvas canvas){
-        canvas.drawColor(Color.WHITE);
+        canvas.drawColor(Color.BLACK);
         for (int i = 0; i < figure.positions[0].length; i++) {
             canvas.drawRect(figure.positions[0][i]-cellSize/2, figure.positions[1][i]-cellSize/2, figure.positions[0][i]+cellSize/2, figure.positions[1][i]+cellSize/2, rectanglePaint);
         }
@@ -139,13 +196,22 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
 
     public void updatePhysics(){
         for (int i = 0; i < figure.positions[0].length; i++) {
-            if (figure.positions[1][i] + cellSize/2 <= height && !reachedFilledCell(figure.positions[1][i]+cellSize, figure.positions[0][i])) {
+            int[] newCoordinates = new int[2];
+            int[] oldCoordinates = new int[2];
+            if (figure.positions[1][i] + cellSize/2 < height && !reachedFilledCell1(figure.positions[1][i]+cellSize, figure.positions[0][i], newCoordinates, oldCoordinates)) {
                 figure.positions[1][i] += figure.yVel;
-            } else{
-                for (int j = 0; j < figure.positions[0].length; j++){
-                    filledCells.add(new Coordinate(figure.positions[0][j], figure.positions[1][j], rectanglePaint));
+            } else {
+                int[] yPositionsOfFigure = new int[figure.positions[0].length];
+           //     filledCells.add(new Coordinate(newCoordinates[0], newCoordinates[1], rectanglePaint));
+                for (int j = 0; j < figure.positions[0].length; j++) {
+                    int deltaX = figure.positions[0][j] - oldCoordinates[0];
+                    int deltaY = figure.positions[1][j] - oldCoordinates[1];
+                    filledCells.add(new Coordinate(newCoordinates[0]+deltaX, newCoordinates[1]+deltaY, rectanglePaint));
+                    yPositionsOfFigure[j] = newCoordinates[1]+deltaY;
+                //    filledCells.add(new Coordinate(figure.positions[0][j], figure.positions[1][j], rectanglePaint));
+                    ;
                 }
-                addHighest(figure);
+                reduce(yPositionsOfFigure);
                 Figures random = pickRandomFigure();
                 if (random.equals(Figures.J))
                     figure = new J(width/2, cellSize);
@@ -161,7 +227,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
                     figure = new T(width/2, cellSize);
                 else if (random.equals(Figures.L))
                     figure = new L(width/2, cellSize);
-                if(reachedFilledCell(figure.positions[1][i] + cellSize, figure.positions[0][i]) && figure.positions[1][i] - cellSize/2 == 0) {
+                if(reachedFilledCell1(figure.positions[1][i]+cellSize, figure.positions[0][i], newCoordinates, oldCoordinates) && figure.positions[1][i] - cellSize/2 == 0) {
                     Intent intent = new Intent(context, GameOver.class);
                     context.startActivity(intent);
                     break;
@@ -170,6 +236,40 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
                 break;
             }
         }
+    }
+
+    //reduces filled lines
+    public void reduce(int[] yPositionsOfNewFigure) {
+        for (int i = 0; i < yPositionsOfNewFigure.length; i++){
+            int yPos = yPositionsOfNewFigure[i];
+            if(!values.containsKey(yPos))
+                values.put(yPos, 1);
+            else {
+                int temp = values.get(yPos);
+                int count = temp + 1;
+                values.remove(yPos);
+                values.put(yPos, count);
+            //    values.replace(yPos, temp, count);
+            }
+        }
+  //      Integer[] valuesArr = new Integer[values.size()];
+  //      values.values().toArray(valuesArr);
+        Integer[] keysArr = new Integer[values.size()];
+        values.keySet().toArray(keysArr);
+    //    for (int i = 0; i < valuesArr.length; i++){
+    //    if (valuesArr[i] == width/cellSize){
+        for (int i = 0; i < keysArr.length; i++){
+            if (values.get(keysArr[i]) == width/cellSize){
+                for (int j = 0; j < filledCells.size(); j++){
+                    if (filledCells.get(j).y == keysArr[i])
+                        filledCells.remove(j);
+                }
+            }
+        }
+    }
+
+    public int updateScore(){
+        return 0;
     }
 
     public Figures pickRandomFigure(){
@@ -182,21 +282,42 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
         Random rand = new Random();
         int x = rand.nextInt(4-0);
         if (x == 0)
-            return Color.RED;
+            return Color.rgb(229, 43, 80);
         else if (x == 1)
-            return Color.BLUE;
+            return Color.rgb(0, 127, 255);
         else if (x == 2)
-            return Color.GREEN;
+            return Color.rgb(127, 255, 0);
         else if (x == 3)
-            return Color.YELLOW;
+            return Color.rgb(253, 233, 16);
         else
             return Color.BLACK;
     }
 
-    public boolean reachedFilledCell(int positionY, int positionX){
+    public Coordinate reachedFilledCell(int positionY, int positionX){
+        Coordinate coord = null;
         for (int i = 0; i < filledCells.toArray().length; i++)
             if (positionY >= filledCells.get(i).y && positionX == filledCells.get(i).x)
+                coord = new Coordinate(filledCells.get(i).x, filledCells.get(i).y, null);
+        return coord;
+    }
+
+    public boolean reachedFilledCell1(int positionY, int positionX, int[] newCoordinates, int[] oldCoordinates){
+        int size = filledCells.toArray().length;
+        for (int i = 0; i < size; i++) {
+            if (positionY >= filledCells.get(i).y && positionX == filledCells.get(i).x) {
+                newCoordinates[0] = filledCells.get(i).x;
+                newCoordinates[1] = filledCells.get(i).y;
+                oldCoordinates[0] = positionX;
+                oldCoordinates[1] = positionY;
                 return true;
+            }
+        }
+        if (size == 0){
+            newCoordinates[0] = positionX;
+            newCoordinates[1] = height - cellSize/2;
+            oldCoordinates[0] = positionX;
+            oldCoordinates[1] = positionY;
+        }
         return false;
     }
 
@@ -210,7 +331,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
         return false;
     }
 
-    public boolean reachedHighest(int positionY, int positionX){
+ /*   public boolean reachedHighest(int positionY, int positionX){
         for (int i = 0; i < highestCells.toArray().length; i++)
             if (positionY >= highestCells.get(i).y && positionX == highestCells.get(i).x)
                 return true;
@@ -222,9 +343,9 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
             if (position >= highestCells.get(i).y)
                 return true;
         return false;
-    }
+    }*/
 
-    public void addHighest(Figure figure){
+ /*   public void addHighest(Figure figure){
         int min = 10000;
         for (int j = 0; j < figure.positions[0].length; j++){
             if(figure.positions[1][j] < min)
@@ -234,7 +355,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback 
             if (figure.positions[1][j] == min)
                 highestCells.add(new Coordinate(figure.positions[0][j],figure.positions[1][j],rectanglePaint));
         }
-    }
+    }*/
 
     public void surfaceCreated(SurfaceHolder holder){
         Rect surfaceFrame = holder.getSurfaceFrame();
