@@ -1,5 +1,6 @@
 package com.example.ksusha.tetris;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -8,6 +9,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -107,7 +109,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             figure.positions[0][i] -= cellSize;
     }
     public void onSwipeBottom() {
-        figure.yVel += 20;
+        figure.yVel += 30;
     }
     public void onSwipeTop() {
     }
@@ -182,7 +184,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         edge.setColor(Color.WHITE);
         int offsetColor = 5;
         for (int i = 0; i < figure.positions[0].length; i++) {
-
             canvas.drawRect(figure.positions[0][i]-cellSize/2, figure.positions[1][i]-cellSize/2, figure.positions[0][i]+cellSize/2, figure.positions[1][i]+cellSize/2, edge);
             canvas.drawRect(figure.positions[0][i]-cellSize/2+offsetColor, figure.positions[1][i]-cellSize/2+offsetColor, figure.positions[0][i]+cellSize/2-offsetColor, figure.positions[1][i]+cellSize/2-offsetColor, rectanglePaint);
         }
@@ -220,20 +221,34 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                 }
                 reduce(yPositionsOfFigure);
                 Figures random = pickRandomFigure();
-                if (random.equals(Figures.J))
-                    figure = new J(width/2, cellSize);
-                else if (random.equals(Figures.I))
-                    figure = new I(width/2, cellSize);
-                else if (random.equals(Figures.Z))
-                    figure = new Z(width/2, cellSize);
-                else if (random.equals(Figures.O))
-                    figure = new O(width/2, cellSize);
-                else if (random.equals(Figures.S))
-                    figure = new S(width/2, cellSize);
-                else if (random.equals(Figures.T))
-                    figure = new T(width/2, cellSize);
-                else if (random.equals(Figures.L))
-                    figure = new L(width/2, cellSize);
+                if (random.equals(Figures.J)) {
+                    figure = new J(context);
+                    ((J)figure).setJ(width / 2, cellSize);
+                }
+                else if (random.equals(Figures.I)) {
+                    figure = new I(context);
+                    ((I)figure).setI(width / 2, cellSize);
+                }
+                else if (random.equals(Figures.Z)) {
+                    figure = new Z(context);
+                    ((Z)figure).setZ(width / 2, cellSize);
+                }
+                else if (random.equals(Figures.O)) {
+                    figure = new O(context);
+                    ((O)figure).setO(width / 2, cellSize);
+                }
+                else if (random.equals(Figures.S)) {
+                    figure = new S(context);
+                    ((S)figure).setS(width / 2, cellSize);
+                }
+                else if (random.equals(Figures.T)) {
+                    figure = new T(context);
+                    ((T)figure).setT(width / 2, cellSize);
+                }
+                else if (random.equals(Figures.L)) {
+                    figure = new L(context);
+                    ((L)figure).setL(width / 2, cellSize);
+                }
                 if(reachedFilledCell1(figure.positions[1][i]+cellSize, figure.positions[0][i], newCoordinates, oldCoordinates) && figure.positions[1][i] - cellSize/2 == 0) {
                     Intent intent = new Intent(context, GameOver.class);
                     context.startActivity(intent);
@@ -373,14 +388,18 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         int temp1 = cellSize/2;
         if (temp != 2*temp1)
             cellSize += 1;
-        while(!this.isShown()){
+    }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus){
+        if (hasWindowFocus){
+            figure = new I(context);
+            ((I) figure).setI(width / 2, cellSize);
+
+            updateThread = new UpdateThread(this);
+            updateThread.setRunning(true);
+            updateThread.start();
         }
-        figure = new I(width/2, cellSize);
-
-        updateThread = new UpdateThread(this);
-        updateThread.setRunning(true);
-        updateThread.start();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height){

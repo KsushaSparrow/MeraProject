@@ -1,12 +1,17 @@
 package com.example.ksusha.tetris;
 
+import android.content.Context;
+
 /**
  * Created by ksusha on 05.07.17.
  */
 
 public class I extends Figure {
     boolean upsidedown;
-    public I(int middle, int cellSize){
+    public I(Context context){
+        super(context);
+    }
+    public void setI(int middle, int cellSize){
         this.middle = middle;
         this.cellSize = cellSize;
         upsidedown = false;

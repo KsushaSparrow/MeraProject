@@ -1,12 +1,17 @@
 package com.example.ksusha.tetris;
 
+import android.content.Context;
+
 /**
  * Created by ksusha on 05.07.17.
  */
 
 public class T extends Figure {
     int stateTurned = 0;
-    public T(int middle, int cellSize){
+    public T(Context context){
+        super(context);
+    }
+    public void setT(int middle, int cellSize){
         this.middle = middle;
         this.cellSize = cellSize;
         positions = new int[2][4];
