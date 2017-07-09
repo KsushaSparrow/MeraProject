@@ -178,11 +178,18 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     @Override
     protected void onDraw(Canvas canvas){
         canvas.drawColor(Color.BLACK);
+        Paint edge = new Paint();
+        edge.setColor(Color.WHITE);
+        int offsetColor = 5;
         for (int i = 0; i < figure.positions[0].length; i++) {
-            canvas.drawRect(figure.positions[0][i]-cellSize/2, figure.positions[1][i]-cellSize/2, figure.positions[0][i]+cellSize/2, figure.positions[1][i]+cellSize/2, rectanglePaint);
+
+            canvas.drawRect(figure.positions[0][i]-cellSize/2, figure.positions[1][i]-cellSize/2, figure.positions[0][i]+cellSize/2, figure.positions[1][i]+cellSize/2, edge);
+            canvas.drawRect(figure.positions[0][i]-cellSize/2+offsetColor, figure.positions[1][i]-cellSize/2+offsetColor, figure.positions[0][i]+cellSize/2-offsetColor, figure.positions[1][i]+cellSize/2-offsetColor, rectanglePaint);
         }
         for (int i = 0; i < filledCells.toArray().length; i++) {
-            canvas.drawRect(filledCells.get(i).x-cellSize/2, filledCells.get(i).y-cellSize/2, filledCells.get(i).x+cellSize/2, filledCells.get(i).y+cellSize/2, filledCells.get(i).paint);
+
+            canvas.drawRect(filledCells.get(i).x-cellSize/2, filledCells.get(i).y-cellSize/2, filledCells.get(i).x+cellSize/2, filledCells.get(i).y+cellSize/2, edge);
+            canvas.drawRect(filledCells.get(i).x-cellSize/2+offsetColor, filledCells.get(i).y-cellSize/2+offsetColor, filledCells.get(i).x+cellSize/2-offsetColor, filledCells.get(i).y+cellSize/2-offsetColor, filledCells.get(i).paint);
         }
     }
 

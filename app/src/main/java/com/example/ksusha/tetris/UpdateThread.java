@@ -9,7 +9,7 @@ import android.provider.Settings;
 import android.view.SurfaceHolder;
 public class UpdateThread extends Thread {
     private long time;
-    private final int fps = 20;
+    private final int fps = 100;
     private boolean toRun = false;
     private MovementView movementView;
     private SurfaceHolder surfaceHolder;
