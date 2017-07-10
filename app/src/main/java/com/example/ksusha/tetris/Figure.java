@@ -60,7 +60,6 @@ public class Figure extends AppCompatImageView implements View.OnDragListener{
                 dragView.setVisibility(View.VISIBLE);
             }
         } else if (dragAction == DragEvent.ACTION_DROP && containsDragable){
-            checkForValidMove(dragView);
             dragView.setVisibility(View.VISIBLE);
         }
         return true;

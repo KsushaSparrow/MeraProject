@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.GestureDetector;
@@ -15,7 +16,13 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +38,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     Figure figure;
     enum Figures {L,O,T,Z,S,J,I};
     enum Colors {RED, BLUE, GREEN, YELLOW};
+
+
     ArrayList<Coordinate> filledCells = new ArrayList<Coordinate>(0);
     HashMap<Integer, Integer> values = new HashMap<Integer, Integer>(0);
 
@@ -38,7 +47,15 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     private int width;
     private int height;
     private int cellSize;
+    private String currentScore = "0";
+    private final static String FILE_NAME = "scores.txt";
+    private String fileFullName = "";
+    File fileScores;
 
+    private Paint scorePaint;
+    int scoreTextSize = 100;
+    float[] widths;
+    float widthScoreText;
     private Paint rectanglePaint;
 
     UpdateThread updateThread;
@@ -54,6 +71,10 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
 
         rectanglePaint = new Paint();
         rectanglePaint.setColor(pickRandomColor());
+        scorePaint = new Paint();
+        scorePaint.setColor(Color.WHITE);
+        scorePaint.setTextSize(scoreTextSize);
+        scorePaint.setStyle(Paint.Style.STROKE);
     }
 
     @Override
@@ -180,6 +201,10 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     @Override
     protected void onDraw(Canvas canvas){
         canvas.drawColor(Color.BLACK);
+        widthScoreText = scorePaint.measureText(currentScore);
+        widths = new float[currentScore.length()];
+        scorePaint.getTextWidths(currentScore, widths);
+        canvas.drawText(currentScore, 40, 100, scorePaint);
         Paint edge = new Paint();
         edge.setColor(Color.WHITE);
         int offsetColor = 5;
@@ -209,11 +234,14 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             if (figure.positions[1][i] + cellSize/2 < height && !reachedFilledCell1(figure.positions[1][i]+cellSize, figure.positions[0][i], newCoordinates, oldCoordinates)) {
                 figure.positions[1][i] += figure.yVel;
             } else {
+                currentScore = String.valueOf(Integer.valueOf(currentScore) + 1);
                 int[] yPositionsOfFigure = new int[figure.positions[0].length];
            //     filledCells.add(new Coordinate(newCoordinates[0], newCoordinates[1], rectanglePaint));
+                int deltaX = 0;
+                int deltaY = 0;
                 for (int j = 0; j < figure.positions[0].length; j++) {
-                    int deltaX = figure.positions[0][j] - oldCoordinates[0];
-                    int deltaY = figure.positions[1][j] - oldCoordinates[1];
+                    deltaX = figure.positions[0][j] - oldCoordinates[0];
+                    deltaY = figure.positions[1][j] - oldCoordinates[1];
                     filledCells.add(new Coordinate(newCoordinates[0]+deltaX, newCoordinates[1]+deltaY, rectanglePaint));
                     yPositionsOfFigure[j] = newCoordinates[1]+deltaY;
                 //    filledCells.add(new Coordinate(figure.positions[0][j], figure.positions[1][j], rectanglePaint));
@@ -249,7 +277,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                     figure = new L(context);
                     ((L)figure).setL(width / 2, cellSize);
                 }
-                if(reachedFilledCell1(figure.positions[1][i]+cellSize, figure.positions[0][i], newCoordinates, oldCoordinates) && figure.positions[1][i] - cellSize/2 == 0) {
+                if(reachedFilledCell1(figure.positions[1][i]+cellSize, figure.positions[0][i], newCoordinates, oldCoordinates) && figure.positions[1][i] - cellSize/2 <= 0) {
                     Intent intent = new Intent(context, GameOver.class);
                     context.startActivity(intent);
                     break;
@@ -379,6 +407,51 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         }
     }*/
 
+    public void saveScore(){
+        FileOutputStream fos = null;
+        fileScores = new File(fileFullName);
+        try{
+            fileScores.createNewFile();
+        } catch (IOException ex){
+            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        try{
+            fos = context.openFileOutput(fileFullName, Context.MODE_PRIVATE);
+            fos.write(currentScore.getBytes());
+            Toast.makeText(context, "File was saved", Toast.LENGTH_SHORT).show();
+        } catch (IOException ex){
+            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
+        } finally {
+            {
+                try{
+                    if (fos != null)
+                        fos.close();
+                } catch (IOException ex){
+                    Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    public void readScores(){
+        FileInputStream fin = null;
+        try{
+            fin = context.openFileInput(FILE_NAME);
+            byte[] bytes = new byte[fin.available()];
+            fin.read(bytes);
+            currentScore = new String(bytes);
+        } catch (IOException ex){
+            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
+        } finally {
+            try{
+                if(fin!=null)
+                    fin.close();
+            } catch (IOException ex){
+                Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     public void surfaceCreated(SurfaceHolder holder){
         Rect surfaceFrame = holder.getSurfaceFrame();
         width = surfaceFrame.width();
@@ -388,6 +461,14 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         int temp1 = cellSize/2;
         if (temp != 2*temp1)
             cellSize += 1;
+    /*    fileFullName = context.getFilesDir() + "/" + FILE_NAME;
+        fileScores = new File(fileFullName);
+        try{
+            fileScores.createNewFile();
+        } catch (IOException ex){
+            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        readScores();*/
     }
 
     @Override
@@ -414,6 +495,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         while(retry){
             try{
                 updateThread.join();
+            //    saveScore();
                 retry = false;
             } catch (InterruptedException e){
 
