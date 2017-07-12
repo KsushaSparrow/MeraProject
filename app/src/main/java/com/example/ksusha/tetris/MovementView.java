@@ -59,6 +59,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     private Paint rectanglePaint;
 
     UpdateThread updateThread;
+    boolean finishedProcessing = true;
 
  //   private int chooseColor;
 
@@ -227,67 +228,76 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         return false;
     }
 
-    public void updatePhysics(){
-        for (int i = 0; i < figure.positions[0].length; i++) {
-            int[] newCoordinates = new int[2];
-            int[] oldCoordinates = new int[2];
-            if (figure.positions[1][i] + cellSize/2 < height && !reachedFilledCell1(figure.positions[1][i]+cellSize, figure.positions[0][i], newCoordinates, oldCoordinates)) {
-                figure.positions[1][i] += figure.yVel;
-            } else {
-                currentScore = String.valueOf(Integer.valueOf(currentScore) + 1);
-                int[] yPositionsOfFigure = new int[figure.positions[0].length];
-           //     filledCells.add(new Coordinate(newCoordinates[0], newCoordinates[1], rectanglePaint));
-                int deltaX = 0;
-                int deltaY = 0;
-                for (int j = 0; j < figure.positions[0].length; j++) {
-                    deltaX = figure.positions[0][j] - oldCoordinates[0];
-                    deltaY = figure.positions[1][j] - oldCoordinates[1];
-                    filledCells.add(new Coordinate(newCoordinates[0]+deltaX, newCoordinates[1]+deltaY, rectanglePaint));
-                    yPositionsOfFigure[j] = newCoordinates[1]+deltaY;
-                //    filledCells.add(new Coordinate(figure.positions[0][j], figure.positions[1][j], rectanglePaint));
-                    ;
-                }
-                reduce(yPositionsOfFigure);
-                Figures random = pickRandomFigure();
-                if (random.equals(Figures.J)) {
-                    figure = new J(context);
-                    ((J)figure).setJ(width / 2, cellSize);
-                }
-                else if (random.equals(Figures.I)) {
-                    figure = new I(context);
-                    ((I)figure).setI(width / 2, cellSize);
-                }
-                else if (random.equals(Figures.Z)) {
-                    figure = new Z(context);
-                    ((Z)figure).setZ(width / 2, cellSize);
-                }
-                else if (random.equals(Figures.O)) {
-                    figure = new O(context);
-                    ((O)figure).setO(width / 2, cellSize);
-                }
-                else if (random.equals(Figures.S)) {
-                    figure = new S(context);
-                    ((S)figure).setS(width / 2, cellSize);
-                }
-                else if (random.equals(Figures.T)) {
-                    figure = new T(context);
-                    ((T)figure).setT(width / 2, cellSize);
-                }
-                else if (random.equals(Figures.L)) {
-                    figure = new L(context);
-                    ((L)figure).setL(width / 2, cellSize);
-                }
-                if(reachedFilledCell1(figure.positions[1][i]+cellSize, figure.positions[0][i], newCoordinates, oldCoordinates) && figure.positions[1][i] - cellSize/2 <= 0) {
-                    Intent intent = new Intent(context, GameOver.class);
-                    context.startActivity(intent);
-                    break;
-                }
-                rectanglePaint.setColor(pickRandomColor());
-                break;
-            }
+    public boolean reachedBottom(){
+        for (int i = 0; i < figure.positions[0].length; i++){
+            if (figure.positions[1][i] + cellSize/2 >= height)
+                return true;
+        }
+        return false;
+    }
+    public void updateYofFigure(){
+        for (int i = 0; i < figure.positions[0].length; i++){
+            figure.positions[1][i] += figure.yVel;
         }
     }
+    public boolean onTheTop(){
+            if (figure.positions[1][findHighestCell()] - cellSize/2 <= 0) {
+                return true;
+        }
+        return false;
+    }
 
+    public void updatePhysics() {
+        if (finishedProcessing){
+            finishedProcessing = false;
+                ReachedCellParameters reachedCellParameters = reachedFilledCell();
+                if (!reachedBottom() && !reachedCellParameters.reached) {
+                    updateYofFigure();
+                } else {
+                    if (reachedCellParameters.reached && onTheTop()) {
+                        Intent intent = new Intent(context, GameOver.class);
+                        context.startActivity(intent);
+                    }
+                    int[] yPositionsOfFigure = new int[figure.positions[0].length];
+                    int deltaX = 0;
+                    int deltaY = 0;
+                    for (int j = 0; j < figure.positions[0].length; j++) {
+                        deltaX = figure.positions[0][j]-reachedCellParameters.oldValues[0];
+                        deltaY = figure.positions[1][j]-reachedCellParameters.oldValues[1];
+                        filledCells.add(new Coordinate(reachedCellParameters.newValues[0] + deltaX, reachedCellParameters.newValues[1] + deltaY, rectanglePaint));
+                        yPositionsOfFigure[j] = reachedCellParameters.newValues[1] + deltaY;
+                    }
+                    currentScore = String.valueOf(Integer.valueOf(currentScore) + 1);
+                    reduce(yPositionsOfFigure);
+                    Figures random = pickRandomFigure();
+                    if (random.equals(Figures.J)) {
+                        figure = new J(context);
+                        ((J) figure).setJ(width / 2, cellSize);
+                    } else if (random.equals(Figures.I)) {
+                        figure = new I(context);
+                        ((I) figure).setI(width / 2, cellSize);
+                    } else if (random.equals(Figures.Z)) {
+                        figure = new Z(context);
+                        ((Z) figure).setZ(width / 2, cellSize);
+                    } else if (random.equals(Figures.O)) {
+                        figure = new O(context);
+                        ((O) figure).setO(width / 2, cellSize);
+                    } else if (random.equals(Figures.S)) {
+                        figure = new S(context);
+                        ((S) figure).setS(width / 2, cellSize);
+                    } else if (random.equals(Figures.T)) {
+                        figure = new T(context);
+                        ((T) figure).setT(width / 2, cellSize);
+                    } else if (random.equals(Figures.L)) {
+                        figure = new L(context);
+                        ((L) figure).setL(width / 2, cellSize);
+                    }
+                    rectanglePaint.setColor(pickRandomColor());
+                    finishedProcessing = true;
+                }
+                finishedProcessing = true;
+        }
+    }
     //reduces filled lines
     public void reduce(int[] yPositionsOfNewFigure) {
         for (int i = 0; i < yPositionsOfNewFigure.length; i++){
@@ -343,33 +353,53 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             return Color.BLACK;
     }
 
-    public Coordinate reachedFilledCell(int positionY, int positionX){
-        Coordinate coord = null;
-        for (int i = 0; i < filledCells.toArray().length; i++)
-            if (positionY >= filledCells.get(i).y && positionX == filledCells.get(i).x)
-                coord = new Coordinate(filledCells.get(i).x, filledCells.get(i).y, null);
-        return coord;
-    }
-
-    public boolean reachedFilledCell1(int positionY, int positionX, int[] newCoordinates, int[] oldCoordinates){
-        int size = filledCells.toArray().length;
-        for (int i = 0; i < size; i++) {
-            if (positionY >= filledCells.get(i).y && positionX == filledCells.get(i).x) {
-                newCoordinates[0] = filledCells.get(i).x;
-                newCoordinates[1] = filledCells.get(i).y;
-                oldCoordinates[0] = positionX;
-                oldCoordinates[1] = positionY;
-                return true;
+    public int findLowestCell(){
+        int maxY = 0;
+        int cellNumber = 0;
+        for (int i = 0; i < figure.positions[0].length; i++){
+            if (figure.positions[1][i] > maxY) {
+                maxY = figure.positions[1][i];
+                cellNumber = i;
             }
         }
-        if (size == 0){
-            newCoordinates[0] = positionX;
-            newCoordinates[1] = height - cellSize/2;
-            oldCoordinates[0] = positionX;
-            oldCoordinates[1] = positionY;
-        }
-        return false;
+        return cellNumber;
     }
+
+    public int findHighestCell(){
+        int maxY = 10000;
+        int cellNumber = 0;
+        for (int i = 0; i < figure.positions[0].length; i++){
+            if (figure.positions[1][i] < maxY) {
+                maxY = figure.positions[1][i];
+                cellNumber = i;
+            }
+        }
+        return cellNumber;
+    }
+
+    public ReachedCellParameters reachedFilledCell(){
+        int sizeOfFilledCells = filledCells.toArray().length;
+        for (int j = 0; j < figure.positions[0].length; j++) {
+            for (int i = 0; i < sizeOfFilledCells; i++) {
+                if (figure.positions[1][j] + cellSize >= filledCells.get(i).y && figure.positions[0][j] == filledCells.get(i).x) {
+                    return new ReachedCellParameters(true, figure.positions[0][j], figure.positions[1][j], figure.positions[0][j], filledCells.get(i).y - cellSize);
+                }
+            }
+        }
+        int temp = height - cellSize/2;
+        int lowestCell = findLowestCell();
+        return new ReachedCellParameters(false, figure.positions[0][lowestCell], figure.positions[1][lowestCell], figure.positions[0][lowestCell], temp);
+    }
+/*    public ReachedCellParameters reachedFilledCell(int positionX, int positionY){
+        int sizeOfFilledCells = filledCells.toArray().length;
+        for (int i = 0; i < sizeOfFilledCells; i++) {
+            if (positionY+cellSize >= filledCells.get(i).y && positionX == filledCells.get(i).x) {
+                return new ReachedCellParameters(true, positionX, positionY, positionX, filledCells.get(i).y-cellSize);
+            }
+        }
+        int temp = height - cellSize/2;
+        return new ReachedCellParameters(false, positionX, positionY, positionX, temp);
+    }*/
 
     public boolean reachedFilledCell(Figure figure, int deltaX){
         for (int i = 0; i < figure.positions[0].length; i++){
