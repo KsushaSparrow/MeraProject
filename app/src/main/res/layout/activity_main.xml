@@ -7,12 +7,11 @@
     android:orientation="vertical"
     tools:context="com.example.ksusha.tetris.MainActivity">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/icon"
-        android:layout_width="0dp"
-        android:layout_height="535dp"
-        android:background="#000000"
-        android:src="@drawable/tetris1"
-        android:scaleType="centerCrop">
+        android:id="@+id/LinearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="0dp">
     //    tools:layout_editor_absoluteY="8dp"
    //     tools:layout_editor_absoluteX="8dp">
         <ImageView

@@ -6,11 +6,39 @@
     android:layout_height="match_parent"
     tools:context="com.example.ksusha.tetris.ScoresActivity">
 
-    <TextView
-        android:id="@+id/allScores"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="MY SCORES"
-        tools:layout_editor_absoluteX="160dp"
-        tools:layout_editor_absoluteY="32dp" />
+    <RelativeLayout
+        android:layout_width="368dp"
+        android:layout_height="495dp"
+        tools:layout_editor_absoluteY="8dp"
+        tools:layout_editor_absoluteX="8dp">
+        <TextView
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:id="@+id/textView1"
+            android:layout_height="wrap_content"
+            android:text=" "></TextView>
+        <TextView
+            android:id="@+id/allScoresTopic"
+            android:layout_marginTop="-230dip"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MY SCORES"
+            tools:layout_editor_absoluteX="142dp"
+            tools:layout_editor_absoluteY="231dp"
+            />
+
+        <TextView
+            android:id="@+id/allScores"
+            android:layout_marginTop="-170dip"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#F2F3F4"
+            android:text="SCORES"
+            tools:layout_editor_absoluteX="142dp"
+            tools:layout_editor_absoluteY="231dp" />
+    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

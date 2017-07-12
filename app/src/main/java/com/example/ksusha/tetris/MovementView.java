@@ -309,21 +309,32 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                 int count = temp + 1;
                 values.remove(yPos);
                 values.put(yPos, count);
-            //    values.replace(yPos, temp, count);
             }
         }
-  //      Integer[] valuesArr = new Integer[values.size()];
-  //      values.values().toArray(valuesArr);
         Integer[] keysArr = new Integer[values.size()];
         values.keySet().toArray(keysArr);
-    //    for (int i = 0; i < valuesArr.length; i++){
-    //    if (valuesArr[i] == width/cellSize){
         for (int i = 0; i < keysArr.length; i++){
-            if (values.get(keysArr[i]) == width/cellSize){
-                for (int j = 0; j < filledCells.size(); j++){
+            int temp = values.get(keysArr[i]);
+            if (temp*cellSize >= width && (temp-1)*cellSize < width){
+                for (int j = 0; j < filledCells.size(); j++) {
                     if (filledCells.get(j).y == keysArr[i])
                         filledCells.remove(j);
                 }
+                for (int j = 0; j < filledCells.size(); j++) {
+                    if(filledCells.get(j).y < keysArr[i]) {
+                        filledCells.get(j).y = filledCells.get(j).y + cellSize;
+                    }
+                }
+                int compare = keysArr[i];
+                for (int j = values.size()-1; j > 0; j--){
+                    if (keysArr[j] <= compare) {
+                        values.remove(compare);
+                        values.put(compare, values.get(keysArr[j-1]));
+                        compare = keysArr[j-1];
+                    }
+                }
+                values.remove(keysArr[0]);
+                values.put(compare, 0);
             }
         }
     }
@@ -390,16 +401,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         int lowestCell = findLowestCell();
         return new ReachedCellParameters(false, figure.positions[0][lowestCell], figure.positions[1][lowestCell], figure.positions[0][lowestCell], temp);
     }
-/*    public ReachedCellParameters reachedFilledCell(int positionX, int positionY){
-        int sizeOfFilledCells = filledCells.toArray().length;
-        for (int i = 0; i < sizeOfFilledCells; i++) {
-            if (positionY+cellSize >= filledCells.get(i).y && positionX == filledCells.get(i).x) {
-                return new ReachedCellParameters(true, positionX, positionY, positionX, filledCells.get(i).y-cellSize);
-            }
-        }
-        int temp = height - cellSize/2;
-        return new ReachedCellParameters(false, positionX, positionY, positionX, temp);
-    }*/
 
     public boolean reachedFilledCell(Figure figure, int deltaX){
         for (int i = 0; i < figure.positions[0].length; i++){
@@ -410,32 +411,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         }
         return false;
     }
-
- /*   public boolean reachedHighest(int positionY, int positionX){
-        for (int i = 0; i < highestCells.toArray().length; i++)
-            if (positionY >= highestCells.get(i).y && positionX == highestCells.get(i).x)
-                return true;
-        return false;
-    }
-
-    public boolean crossesHighest(int position){
-        for (int i = 0; i < highestCells.toArray().length; i++)
-            if (position >= highestCells.get(i).y)
-                return true;
-        return false;
-    }*/
-
- /*   public void addHighest(Figure figure){
-        int min = 10000;
-        for (int j = 0; j < figure.positions[0].length; j++){
-            if(figure.positions[1][j] < min)
-                min = figure.positions[1][j];
-        }
-        for (int j = 0; j < figure.positions[0].length; j++){
-            if (figure.positions[1][j] == min)
-                highestCells.add(new Coordinate(figure.positions[0][j],figure.positions[1][j],rectanglePaint));
-        }
-    }*/
 
     public void saveScore(){
         FileOutputStream fos = null;
