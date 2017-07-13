@@ -29,29 +29,27 @@ public class ScoresActivity extends AppCompatActivity {
     }
 
     public void setScores(){
-        File scoresFile = new File(Environment.getExternalStorageDirectory()+"/data/",FILE_NAME);
+        File scoresFile = new File(getFilesDir(), FILE_NAME);
         if(!scoresFile.exists()) {
             try {
                 String str = "0";
                 scoresFile.createNewFile();
                 try {
-                    FileOutputStream fOut = openFileOutput(scoresFile.getAbsolutePath(), MODE_WORLD_READABLE);
-                    OutputStreamWriter osw = new OutputStreamWriter(fOut);
-                    osw.write(str);
-                    osw.flush();
-                    osw.close();
+                    FileOutputStream fOut = new FileOutputStream(new File(scoresFile.getAbsolutePath().toString()),true);
+                    fOut.write(str.getBytes());
+                    fOut.close();
                 } catch (Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Exception: " + t.toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Exception1: " + t.toString(), Toast.LENGTH_LONG).show();
                 }
                 Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
                 text.setText(str);
             } catch (Exception e1) {
-                Toast.makeText(getApplicationContext(), "Exception: " + e1.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Exception2: " + e1.toString(), Toast.LENGTH_LONG).show();
             }
         }
         else {
                 try {
-                    FileInputStream fIn = openFileInput(scoresFile.getAbsolutePath());
+                    FileInputStream fIn = new FileInputStream(new File(scoresFile.getAbsolutePath().toString()));
                     InputStreamReader isr = new InputStreamReader(fIn);
                     char[] inputBuffer = new char[16];
                     isr.read(inputBuffer);
@@ -64,10 +62,11 @@ public class ScoresActivity extends AppCompatActivity {
                         buffer.append(str + "\n");
                     }*/
                     isr.close();
-                    Toast.makeText(getApplicationContext(), read, Toast.LENGTH_LONG).show();
+                //    Toast.makeText(getApplicationContext(), read, Toast.LENGTH_LONG).show();
+
                     text.setText(read);
                 } catch (Throwable t){
-                    Toast.makeText(getApplicationContext(), "Exception: " + t.toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Exception3: " + t.toString(), Toast.LENGTH_LONG).show();
                 }
             }
     }

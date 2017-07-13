@@ -36,7 +36,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
 
     Context context;
     Figure figure;
-    enum Figures {L,O,T,Z,S,J,I};
+    enum Figures {L,O,T,Z,S,J,I, BONUS};
     enum Colors {RED, BLUE, GREEN, YELLOW};
 
 
@@ -60,6 +60,9 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
 
     UpdateThread updateThread;
     boolean finishedProcessing = true;
+
+    public int numberOfFigures = 0;
+    int color = Color.BLACK;
 
  //   private int chooseColor;
 
@@ -201,7 +204,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     protected void onDraw(Canvas canvas){
-        canvas.drawColor(Color.BLACK);
+        canvas.drawColor(color);
         widthScoreText = scorePaint.measureText(currentScore);
         widths = new float[currentScore.length()];
         scorePaint.getTextWidths(currentScore, widths);
@@ -255,9 +258,12 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                     updateYofFigure();
                 } else {
                     if (reachedCellParameters.reached && onTheTop()) {
+                        saveScore();
+                        updateThread.setRunning(false);
                         Intent intent = new Intent(context, GameOver.class);
                         context.startActivity(intent);
                     }
+                    currentScore = String.valueOf(Integer.valueOf(currentScore)+1);
                     int[] yPositionsOfFigure = new int[figure.positions[0].length];
                     int deltaX = 0;
                     int deltaY = 0;
@@ -267,8 +273,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                         filledCells.add(new Coordinate(reachedCellParameters.newValues[0] + deltaX, reachedCellParameters.newValues[1] + deltaY, rectanglePaint));
                         yPositionsOfFigure[j] = reachedCellParameters.newValues[1] + deltaY;
                     }
-                    currentScore = String.valueOf(Integer.valueOf(currentScore) + 1);
                     reduce(yPositionsOfFigure);
+                    rectanglePaint.setColor(pickRandomColor());
                     Figures random = pickRandomFigure();
                     if (random.equals(Figures.J)) {
                         figure = new J(context);
@@ -291,8 +297,12 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                     } else if (random.equals(Figures.L)) {
                         figure = new L(context);
                         ((L) figure).setL(width / 2, cellSize);
+                    } else if (random.equals(Figures.BONUS)) {
+                        figure = new BonusFigure(context);
+                        ((BonusFigure) figure).setBonusFigure(width / 2, cellSize);
+                        rectanglePaint.setColor(Color.MAGENTA);
+                        setTemporaryBackground();
                     }
-                    rectanglePaint.setColor(pickRandomColor());
                     finishedProcessing = true;
                 }
                 finishedProcessing = true;
@@ -339,13 +349,17 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         }
     }
 
+    public void setTemporaryBackground(){
+        color = Color.MAGENTA;
+    }
+
     public int updateScore(){
         return 0;
     }
 
     public Figures pickRandomFigure(){
         Random rand = new Random();
-        int x = rand.nextInt(7-0);
+        int x = rand.nextInt(8-0);
         return Figures.values()[x];
     }
 
@@ -413,48 +427,23 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     public void saveScore(){
-        FileOutputStream fos = null;
-        fileScores = new File(fileFullName);
-        try{
-            fileScores.createNewFile();
-        } catch (IOException ex){
-            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-        try{
-            fos = context.openFileOutput(fileFullName, Context.MODE_PRIVATE);
-            fos.write(currentScore.getBytes());
-            Toast.makeText(context, "File was saved", Toast.LENGTH_SHORT).show();
-        } catch (IOException ex){
-            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
-        } finally {
-            {
-                try{
-                    if (fos != null)
-                        fos.close();
-                } catch (IOException ex){
-                    Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
-                }
+        String str = currentScore;
+        File scoresFile = new File(context.getFilesDir(), FILE_NAME);
+        if(!scoresFile.exists()) {
+            try {
+                scoresFile.createNewFile();
+            } catch (Exception e1) {
+                Toast.makeText(context.getApplicationContext(), "Exception2: " + e1.toString(), Toast.LENGTH_LONG).show();
             }
         }
-    }
-
-    public void readScores(){
-        FileInputStream fin = null;
-        try{
-            fin = context.openFileInput(FILE_NAME);
-            byte[] bytes = new byte[fin.available()];
-            fin.read(bytes);
-            currentScore = new String(bytes);
-        } catch (IOException ex){
-            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
-        } finally {
-            try{
-                if(fin!=null)
-                    fin.close();
-            } catch (IOException ex){
-                Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+        try {
+            FileOutputStream fOut = new FileOutputStream(new File(scoresFile.getAbsolutePath().toString()),true);
+            fOut.write(str.getBytes());
+            fOut.close();
+        } catch (Throwable t) {
+            Toast.makeText(context.getApplicationContext(), "Exception1: " + t.toString(), Toast.LENGTH_LONG).show();
         }
+        Toast.makeText(context.getApplicationContext(), str, Toast.LENGTH_LONG).show();
     }
 
     public void surfaceCreated(SurfaceHolder holder){
