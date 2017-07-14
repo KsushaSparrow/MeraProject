@@ -1,5 +1,6 @@
 package com.example.ksusha.tetris;
 
+import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         mediaPlayer = MediaPlayer.create(this, R.raw.tetris1);
         try{
             mediaPlayer.prepare();
@@ -81,12 +83,13 @@ public class MainActivity extends AppCompatActivity {
     public void switchMusic(){
         if (playMusic){
             playMusic = false;
-            mediaPlayer.stop();
+            mediaPlayer.pause();
             findViewById(R.id.musicOn).setVisibility(View.INVISIBLE);
         } else if (!playMusic){
             playMusic = true;
-            mediaPlayer.stop();
-            mediaPlayer.reset();
+            mediaPlayer.seekTo(0);
+            mediaPlayer.start();
+            mediaPlayer.setLooping(true);
             findViewById(R.id.musicOn).setVisibility(View.VISIBLE);
         }
     }

@@ -1,5 +1,6 @@
 package com.example.ksusha.tetris;
 
+import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -24,12 +25,17 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectStreamException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.TreeMap;
 
 public class MovementView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
+
+    private boolean gotFocusOnce = false;
 
     private Matrix translate;
     private GestureDetector gestures;
@@ -41,14 +47,14 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
 
 
     ArrayList<Coordinate> filledCells = new ArrayList<Coordinate>(0);
-    HashMap<Integer, Integer> values = new HashMap<Integer, Integer>(0);
+    TreeMap<Integer, Integer> values = new TreeMap<Integer, Integer>();
 
 
     private int width;
     private int height;
     private int cellSize;
     private String currentScore = "0";
-    private final static String FILE_NAME = "scores.txt";
+    private final static String FILE_NAME = "tetris_scores.txt";
     private String fileFullName = "";
     File fileScores;
 
@@ -63,6 +69,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
 
     public int numberOfFigures = 0;
     int color = Color.BLACK;
+    boolean changingColorStarted = false;
 
  //   private int chooseColor;
 
@@ -103,9 +110,9 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                 float diffY = e2.getY() - e1.getY();
                 float diffX = e2.getX() - e1.getX();
                 if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                    if (diffX > 0) {
+                    if (diffX > 0 && !figureIsOverSide()) {
                         onSwipeRight();
-                    } else{
+                    } else if (diffX <= 0 && !figureIsOverSide()){
                             onSwipeLeft();
                         }
                         result = true;
@@ -263,7 +270,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                         Intent intent = new Intent(context, GameOver.class);
                         context.startActivity(intent);
                     }
-                    currentScore = String.valueOf(Integer.valueOf(currentScore)+1);
+                //    currentScore = String.valueOf(Integer.valueOf(currentScore)+1);
                     int[] yPositionsOfFigure = new int[figure.positions[0].length];
                     int deltaX = 0;
                     int deltaY = 0;
@@ -301,7 +308,10 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                         figure = new BonusFigure(context);
                         ((BonusFigure) figure).setBonusFigure(width / 2, cellSize);
                         rectanglePaint.setColor(Color.MAGENTA);
-                        setTemporaryBackground();
+                   //     changeColor();
+                    //    BackgroundBonusThread backgroundBonusThread = new BackgroundBonusThread(this);
+                     //   backgroundBonusThread.setRunning(true);
+                      //  backgroundBonusThread.start();
                     }
                     finishedProcessing = true;
                 }
@@ -310,6 +320,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     }
     //reduces filled lines
     public void reduce(int[] yPositionsOfNewFigure) {
+        int bonus = 1;
         for (int i = 0; i < yPositionsOfNewFigure.length; i++){
             int yPos = yPositionsOfNewFigure[i];
             if(!values.containsKey(yPos))
@@ -327,34 +338,26 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             int temp = values.get(keysArr[i]);
             if (temp*cellSize >= width && (temp-1)*cellSize < width){
                 for (int j = 0; j < filledCells.size(); j++) {
-                    if (filledCells.get(j).y == keysArr[i])
+                    if (filledCells.get(j).y == keysArr[i]) {
+                        if (filledCells.get(j).paint.getColor() == Color.MAGENTA)
+                            bonus++;
                         filledCells.remove(j);
-                }
-                for (int j = 0; j < filledCells.size(); j++) {
-                    if(filledCells.get(j).y < keysArr[i]) {
-                        filledCells.get(j).y = filledCells.get(j).y + cellSize;
+                        j--;
+                    } else if(filledCells.get(j).y < keysArr[i]) {
+                        filledCells.get(j).y += cellSize;
                     }
                 }
                 int compare = keysArr[i];
                 for (int j = values.size()-1; j > 0; j--){
                     if (keysArr[j] <= compare) {
-                        values.remove(compare);
                         values.put(compare, values.get(keysArr[j-1]));
                         compare = keysArr[j-1];
                     }
                 }
-                values.remove(keysArr[0]);
                 values.put(compare, 0);
+                currentScore = String.valueOf(Integer.valueOf(currentScore)+16*bonus);
             }
         }
-    }
-
-    public void setTemporaryBackground(){
-        color = Color.MAGENTA;
-    }
-
-    public int updateScore(){
-        return 0;
     }
 
     public Figures pickRandomFigure(){
@@ -426,6 +429,51 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         return false;
     }
 
+    private void changeColor () {
+        if(!changingColorStarted) {
+            changingColorStarted = true;
+            final float[] from = new float[3];
+            final float[] to = new float[3];
+            Color.colorToHSV(Color.parseColor("#FFFFFFFF"), from);
+            Color.colorToHSV(Color.parseColor("#FFFF0000"), to);
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+            anim.setDuration(3000);
+            final float[] hsv = new float[3];
+            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    hsv[0] = from[0] + (to[0] - from[0]) * valueAnimator.getAnimatedFraction();
+                    hsv[1] = from[1] + (to[1] - from[1]) * valueAnimator.getAnimatedFraction();
+                    hsv[2] = from[2] + (to[2] - from[2]) * valueAnimator.getAnimatedFraction();
+
+                    setBackgroundColor(Color.HSVToColor(hsv));
+                    color = Color.TRANSPARENT;
+                }
+            });
+            anim.start();
+    /*
+        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float position = valueAnimator.getAnimatedFraction();
+             //   int blended = blendColors(initialColor, finalColor, position);
+                color = Color.MAGENTA;
+             //   color = blended;
+            }
+        });*/
+        }
+    }
+
+    private  int blendColors (int from, int to, float ratio){
+        final float inverseRatio = 1f - ratio;
+        final float r = Color.red(to)*ratio + Color.red(from)*inverseRatio;
+        final float g = Color.green(to)*ratio + Color.green(from)*inverseRatio;
+        final float b = Color.blue(to)*ratio + Color.blue(from)*inverseRatio;
+        return Color.rgb((int)r, (int)g, (int)b);
+    }
+
     public void saveScore(){
         String str = currentScore;
         File scoresFile = new File(context.getFilesDir(), FILE_NAME);
@@ -438,7 +486,10 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         }
         try {
             FileOutputStream fOut = new FileOutputStream(new File(scoresFile.getAbsolutePath().toString()),true);
-            fOut.write(str.getBytes());
+            OutputStreamWriter ow = new OutputStreamWriter(fOut);
+            ow.append("\n\r");
+            ow.append(str);
+            ow.close();
             fOut.close();
         } catch (Throwable t) {
             Toast.makeText(context.getApplicationContext(), "Exception1: " + t.toString(), Toast.LENGTH_LONG).show();
@@ -467,13 +518,16 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus){
-        if (hasWindowFocus){
-            figure = new I(context);
-            ((I) figure).setI(width / 2, cellSize);
+        if (!gotFocusOnce) {
+            gotFocusOnce = true;
+            if (hasWindowFocus) {
+                figure = new I(context);
+                ((I) figure).setI(width / 2, cellSize);
 
-            updateThread = new UpdateThread(this);
-            updateThread.setRunning(true);
-            updateThread.start();
+                updateThread = new UpdateThread(this);
+                updateThread.setRunning(true);
+                updateThread.start();
+            }
         }
     }
 

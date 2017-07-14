@@ -16,7 +16,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 public class ScoresActivity extends AppCompatActivity {
-    private final static String FILE_NAME = "scores.txt";
+    private final static String FILE_NAME = "tetris_scores.txt";
     private String fileFullName = "";
     private TextView text;
 
