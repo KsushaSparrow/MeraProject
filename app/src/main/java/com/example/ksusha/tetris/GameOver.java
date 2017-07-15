@@ -35,10 +35,12 @@ public class GameOver extends AppCompatActivity {
     }
 
     public void onClickStartAgain(){
-        GameActivity gameActivity = new GameActivity();
-        Intent i = new Intent(gameActivity, gameActivity.getClass());
-        this.startActivity(i);
-  //      gameActivity.onRestart();
+        Intent i = new Intent(this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivityIfNeeded(i, 0);
+        this.finish();
+
+
     }
 
     public void onClickExit(){

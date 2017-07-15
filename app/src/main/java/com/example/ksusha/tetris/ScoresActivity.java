@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
 public class ScoresActivity extends AppCompatActivity {
     private final static String FILE_NAME = "tetris_scores.txt";
@@ -32,42 +33,39 @@ public class ScoresActivity extends AppCompatActivity {
         File scoresFile = new File(getFilesDir(), FILE_NAME);
         if(!scoresFile.exists()) {
             try {
-                String str = "0";
                 scoresFile.createNewFile();
-                try {
-                    FileOutputStream fOut = new FileOutputStream(new File(scoresFile.getAbsolutePath().toString()),true);
-                    fOut.write(str.getBytes());
-                    fOut.close();
-                } catch (Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Exception1: " + t.toString(), Toast.LENGTH_LONG).show();
-                }
-                Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
-                text.setText(str);
             } catch (Exception e1) {
                 Toast.makeText(getApplicationContext(), "Exception2: " + e1.toString(), Toast.LENGTH_LONG).show();
             }
         }
-        else {
-                try {
-                    FileInputStream fIn = new FileInputStream(new File(scoresFile.getAbsolutePath().toString()));
-                    InputStreamReader isr = new InputStreamReader(fIn);
-                    char[] inputBuffer = new char[16];
-                    isr.read(inputBuffer);
-                    String read = new String(inputBuffer);
-            /*        FileReader fr = new FileReader(scoresFile);
+        try {
+            FileInputStream fIn = new FileInputStream(new File(scoresFile.getAbsolutePath().toString()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fIn));
+            String line = reader.readLine();
+            int counter = 0;
+            while(line != null) {
+                counter++;
+                text.setText(text.getText() + "\n" + counter + ". " + line);
+                line = reader.readLine();
+            }
+
+            /*
+            InputStreamReader isr = new InputStreamReader(fIn);
+            char[] inputBuffer = new char[16];
+            isr.read(inputBuffer);
+            String read = new String(inputBuffer);
+                   FileReader fr = new FileReader(scoresFile);
                     BufferedReader reader = new BufferedReader(fr);
                     String str;
                     StringBuffer buffer = new StringBuffer();
                     while ((str = reader.readLine()) != null){
                         buffer.append(str + "\n");
-                    }*/
-                    isr.close();
+                    }
+                    isr.close();*/
                 //    Toast.makeText(getApplicationContext(), read, Toast.LENGTH_LONG).show();
 
-                    text.setText(read);
-                } catch (Throwable t){
-                    Toast.makeText(getApplicationContext(), "Exception3: " + t.toString(), Toast.LENGTH_LONG).show();
-                }
-            }
+        } catch (Throwable t){
+            Toast.makeText(getApplicationContext(), "Exception3: " + t.toString(), Toast.LENGTH_LONG).show();
+        }
     }
 }

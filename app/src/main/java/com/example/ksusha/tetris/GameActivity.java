@@ -14,10 +14,10 @@ public class GameActivity extends AppCompatActivity {
         setContentView(new MovementView(this));
     }
 
-    @Override
+ /*   @Override
     protected void onRestart(){
         super.onRestart();
-    }
+    }*/
 
     @Override
     protected void onPause(){
@@ -39,10 +39,14 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
+        Intent intent = new Intent(this, GameOver.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        this.finish();
+        startActivity(intent);
     }
-
+/*
     public void startAgain(){
         Intent i = new Intent(this, this.getClass());
         this.startActivity(i);
-    }
+    }*/
 }

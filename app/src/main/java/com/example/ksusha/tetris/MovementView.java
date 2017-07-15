@@ -20,15 +20,19 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectStreamException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
@@ -36,6 +40,7 @@ import java.util.TreeMap;
 public class MovementView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
 
     private boolean gotFocusOnce = false;
+    int divideBy = 10;
 
     private Matrix translate;
     private GestureDetector gestures;
@@ -266,9 +271,19 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                 } else {
                     if (reachedCellParameters.reached && onTheTop()) {
                         saveScore();
-                        updateThread.setRunning(false);
                         Intent intent = new Intent(context, GameOver.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
+                        boolean retry = true;
+                        updateThread.setRunning(false);
+                        while(retry) {
+                            try {
+                                updateThread.join();
+                                retry = false;
+                            } catch (InterruptedException e) {
+
+                            }
+                        }
                     }
                 //    currentScore = String.valueOf(Integer.valueOf(currentScore)+1);
                     int[] yPositionsOfFigure = new int[figure.positions[0].length];
@@ -355,7 +370,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                     }
                 }
                 values.put(compare, 0);
-                currentScore = String.valueOf(Integer.valueOf(currentScore)+16*bonus);
+                currentScore = String.valueOf(Integer.valueOf(currentScore)+divideBy*bonus);
             }
         }
     }
@@ -475,7 +490,46 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     public void saveScore(){
-        String str = currentScore;
+        boolean addedScore = false;
+        ArrayList<Integer> scores = getPreviousSortedScores();
+        if (scores.size() < 5) {
+            scores.add(Integer.valueOf(currentScore));
+            addedScore = true;
+        }
+        for (int i = 0; i < scores.size() && i < 5 && !addedScore; i++){
+            if (Integer.valueOf(currentScore) > scores.get(i)) {
+                scores.set(i, Integer.valueOf(currentScore));
+                addedScore = true;
+                break;
+            }
+        }
+
+        File scoresFile = new File(context.getFilesDir(), FILE_NAME);
+        if(!scoresFile.exists()) {
+            try {
+                scoresFile.createNewFile();
+            } catch (Exception e1) {
+                Toast.makeText(context.getApplicationContext(), "Exception1: " + e1.toString(), Toast.LENGTH_LONG).show();
+            }
+        }
+        Collections.sort(scores, new ScoresComparatorReverse());//change this
+        try {
+            PrintWriter writer = new PrintWriter(scoresFile);
+            writer.print("");
+            for (int i = 0; i < scores.size(); i++) {
+                if (i < scores.size()-1)
+                    writer.println(scores.get(i));
+                else
+                    writer.print(scores.get(scores.size()-1));
+            }
+            writer.close();
+        } catch (Exception e){
+            Toast.makeText(context.getApplicationContext(), "Exception2: " + e.toString(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public ArrayList<Integer> getPreviousSortedScores(){
+        ArrayList<Integer> scores = new ArrayList<Integer>(0);
         File scoresFile = new File(context.getFilesDir(), FILE_NAME);
         if(!scoresFile.exists()) {
             try {
@@ -485,23 +539,44 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             }
         }
         try {
-            FileOutputStream fOut = new FileOutputStream(new File(scoresFile.getAbsolutePath().toString()),true);
-            OutputStreamWriter ow = new OutputStreamWriter(fOut);
-            ow.append("\n\r");
-            ow.append(str);
-            ow.close();
-            fOut.close();
-        } catch (Throwable t) {
-            Toast.makeText(context.getApplicationContext(), "Exception1: " + t.toString(), Toast.LENGTH_LONG).show();
+            FileInputStream fIn = new FileInputStream(new File(scoresFile.getAbsolutePath().toString()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fIn));
+            String line = reader.readLine();
+            while(line != null){
+                scores.add(Integer.valueOf(line));
+                line = reader.readLine();
+            }
+
+        /*    InputStreamReader isr = new InputStreamReader(fIn);
+            char[] inputBuffer = new char[16];
+            isr.read(inputBuffer);
+            String read = new String(inputBuffer);
+
+            isr.close();*/
+        } catch (Throwable t){
+            Toast.makeText(context, "Exception3: " + t.toString(), Toast.LENGTH_LONG).show();
         }
-        Toast.makeText(context.getApplicationContext(), str, Toast.LENGTH_LONG).show();
+        Collections.sort(scores, new ScoresComparator());
+        return scores;
+    }
+
+    public class ScoresComparator implements Comparator<Integer>{
+        public int compare(Integer first, Integer second){
+            return first.compareTo(second);
+        }
+    }
+
+    public class ScoresComparatorReverse implements Comparator<Integer>{
+        public int compare(Integer first, Integer second){
+            return (1-first.compareTo(second));
+        }
     }
 
     public void surfaceCreated(SurfaceHolder holder){
         Rect surfaceFrame = holder.getSurfaceFrame();
         width = surfaceFrame.width();
         height = surfaceFrame.height();
-        cellSize = Math.round(width/16);
+        cellSize = Math.round(width/divideBy);
         int temp = cellSize;
         int temp1 = cellSize/2;
         if (temp != 2*temp1)
@@ -543,6 +618,9 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         while(retry){
             try{
                 updateThread.join();
+            //    Intent intent = new Intent(context, GameOver.class);
+             //   intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+              //  context.startActivity(intent);
             //    saveScore();
                 retry = false;
             } catch (InterruptedException e){
