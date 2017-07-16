@@ -13,71 +13,75 @@ import android.widget.ImageButton;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
+    boolean created = false;
     MediaPlayer mediaPlayer;
     boolean playMusic = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-        mediaPlayer = MediaPlayer.create(this, R.raw.tetris1);
-        try{
-            mediaPlayer.prepare();
-        } catch (IllegalStateException e){
-            e.printStackTrace();
-        } catch (IOException e){
-            e.printStackTrace();
+        if (!created) {
+            created = true;
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+            mediaPlayer = MediaPlayer.create(this, R.raw.tetris1);
+            try {
+                mediaPlayer.prepare();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mediaPlayer.start();
+            mediaPlayer.setLooping(true);
+            Button buttonStart = (Button) findViewById(R.id.buttonStart);
+            buttonStart.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    onClickStart();
+                }
+
+            });
+
+            Button buttonScores = (Button) findViewById(R.id.buttonScores);
+            buttonScores.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    onClickScores();
+                }
+
+            });
+
+            Button buttonRules = (Button) findViewById(R.id.rules);
+            buttonRules.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    onClickRules();
+                }
+
+            });
+
+            ImageButton buttonMusicOn = (ImageButton) findViewById(R.id.musicOn);
+            buttonMusicOn.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    switchMusic();
+                }
+            });
+
+            ImageButton buttonMusicOff = (ImageButton) findViewById(R.id.musicOff);
+            buttonMusicOff.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    switchMusic();
+                }
+            });
         }
-        mediaPlayer.start();
-        mediaPlayer.setLooping(true);
-        Button buttonStart = (Button) findViewById(R.id.buttonStart);
-        buttonStart.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                onClickStart();
-            }
-
-        });
-
-        Button buttonScores = (Button) findViewById(R.id.buttonScores);
-        buttonScores.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                onClickScores();
-            }
-
-        });
-
-        Button buttonRules = (Button) findViewById(R.id.rules);
-        buttonRules.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                onClickRules();
-            }
-
-        });
-
-        ImageButton buttonMusicOn = (ImageButton) findViewById(R.id.musicOn);
-        buttonMusicOn.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v){
-                switchMusic();
-            }
-        });
-
-        ImageButton buttonMusicOff = (ImageButton) findViewById(R.id.musicOff);
-        buttonMusicOff.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v){
-                switchMusic();
-            }
-        });
     }
 
     public void onClickStart(){
