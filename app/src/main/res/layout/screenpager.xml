@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dip"
+    android:background="#ddd">
+
+    <TextView
+        android:id="@+id/text_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:background="#FFF0F5"
+        android:textColor="#fff"
+        android:textSize="30dip"/>
+
+    <ImageView
+        android:id="@+id/icon1"
+        android:layout_width="70dp"
+        android:layout_height="100dp"
+        android:background="#000000"
+        android:src="@drawable/L"
+        android:scaleType="centerCrop"/>
+
+    <ImageView
+        android:id="@+id/icon2"
+        android:layout_width="70dp"
+        android:layout_height="100dp"
+        android:layout_marginLeft="100dp"
+        android:background="#000000"
+        android:src="@drawable/J"
+        android:scaleType="centerCrop"/>3/home/ksusha/Рабочий стол/I.jpg
+    /home/ksusha/Рабочий стол/J.jpg
+    /home/ksusha/Рабочий стол/L.jpg
+    /home/ksusha/Рабочий стол/O.jpg
+    /home/ksusha/Рабочий стол/S.jpg
+    /home/ksusha/Рабочий стол/T.jpg
+    /home/ksusha/Рабочий стол/Z.jpg
+    <ImageView
+        android:id="@+id/icon3"
+        android:layout_width="120dp"
+        android:layout_height="70dp"
+        android:layout_marginLeft="275dp"
+        android:layout_marginTop="100dp"
+        android:background="#000000"
+        android:src="@drawable/T"
+        android:scaleType="centerCrop"/>
+
+</RelativeLayout>

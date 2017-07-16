@@ -271,19 +271,11 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                 } else {
                     if (reachedCellParameters.reached && onTheTop()) {
                         saveScore();
+                        boolean retry = true;
+                        updateThread.setRunning(false);
                         Intent intent = new Intent(context, GameOver.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
-                        boolean retry = true;
-                        updateThread.setRunning(false);
-                        while(retry) {
-                            try {
-                                updateThread.join();
-                                retry = false;
-                            } catch (InterruptedException e) {
-
-                            }
-                        }
                     }
                 //    currentScore = String.valueOf(Integer.valueOf(currentScore)+1);
                     int[] yPositionsOfFigure = new int[figure.positions[0].length];
@@ -424,7 +416,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         int sizeOfFilledCells = filledCells.toArray().length;
         for (int j = 0; j < figure.positions[0].length; j++) {
             for (int i = 0; i < sizeOfFilledCells; i++) {
-                if (figure.positions[1][j] + cellSize >= filledCells.get(i).y && figure.positions[0][j] == filledCells.get(i).x) {
+                if (figure.positions[1][j] + cellSize >= filledCells.get(i).y && figure.positions[1][j] + cellSize < filledCells.get(i).y+cellSize &&
+                        figure.positions[0][j] == filledCells.get(i).x) {
                     return new ReachedCellParameters(true, figure.positions[0][j], figure.positions[1][j], figure.positions[0][j], filledCells.get(i).y - cellSize);
                 }
             }

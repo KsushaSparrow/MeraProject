@@ -51,6 +51,16 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+        Button buttonRules = (Button) findViewById(R.id.rules);
+        buttonRules.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                onClickRules();
+            }
+
+        });
+
         ImageButton buttonMusicOn = (ImageButton) findViewById(R.id.musicOn);
         buttonMusicOn.setOnClickListener(new View.OnClickListener(){
 
@@ -77,6 +87,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickScores(){
         Intent intent = new Intent(this, ScoresActivity.class);
+        startActivity(intent);
+    }
+
+    public void onClickRules(){
+        Intent intent = new Intent(this, RulesActivity.class);
         startActivity(intent);
     }
 

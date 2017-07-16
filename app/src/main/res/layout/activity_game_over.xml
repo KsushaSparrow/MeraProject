@@ -70,14 +70,14 @@
 
 
         <Button
-            android:id="@+id/buttonExit"
+            android:id="@+id/buttonToScores"
             android:layout_marginTop="1dip"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onClickExit"
-            android:text="EXIT"
+            android:onClick="onClickToScores"
+            android:text="SCORES"
             tools:layout_editor_absoluteX="142dp"
             tools:layout_editor_absoluteY="231dp" />
     </RelativeLayout>
