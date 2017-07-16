@@ -183,6 +183,10 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         }
     }
 
+    public void setBonusColor(int color){
+        this.color = color;
+    }
+
     public int[][] getMinAndMaxCoordFigure(){
         int[][] arr = new int[2][2];
         int minX = 10000;
@@ -315,6 +319,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                         figure = new BonusFigure(context);
                         ((BonusFigure) figure).setBonusFigure(width / 2, cellSize);
                         rectanglePaint.setColor(Color.MAGENTA);
+                        BonusColorThread bonusThread = new BonusColorThread(this);
+                        bonusThread.start();
                    //     changeColor();
                     //    BackgroundBonusThread backgroundBonusThread = new BackgroundBonusThread(this);
                      //   backgroundBonusThread.setRunning(true);
@@ -346,8 +352,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             if (temp*cellSize >= width && (temp-1)*cellSize < width){
                 for (int j = 0; j < filledCells.size(); j++) {
                     if (filledCells.get(j).y == keysArr[i]) {
-                        if (filledCells.get(j).paint.getColor() == Color.MAGENTA)
-                            bonus++;
                         filledCells.remove(j);
                         j--;
                     } else if(filledCells.get(j).y < keysArr[i]) {
@@ -362,6 +366,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                     }
                 }
                 values.put(compare, 0);
+                if (color != Color.BLACK)
+                    bonus++;
                 currentScore = String.valueOf(Integer.valueOf(currentScore)+divideBy*bonus);
             }
         }

@@ -36,7 +36,6 @@ public class UpdateThread extends Thread {
                 try{
                     c = surfaceHolder.lockCanvas(null);
 
-
                     movementView.updatePhysics();
                     movementView.onDraw(c);
                 } finally {
