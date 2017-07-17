@@ -157,7 +157,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         public boolean onSingleTapConfirmed(MotionEvent event){
             boolean reachedFilledCell = reachedFilledCell(figure, 0);
             if (touchInsideFigure(event.getX(), event.getY()) && !reachedFilledCell){
-                figure.turn();
+                if (!crossesFilledCells(getTurnedFigure()))
+                    figure.turn();
             } else if (event.getX() >= width/2 && !figureIsOverSideRight() && !reachedFilledCell(figure, cellSize)) {
                 for (int i = 0; i < figure.positions[0].length; i++)
                     figure.positions[0][i] += cellSize;
@@ -185,8 +186,36 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         }
     }
 
-    public void setBonusColor(int color){
-        this.color = color;
+    public Figure getTurnedFigure(){
+        Figure temp = null;
+        if (figure instanceof I) {
+            temp = new I(context);
+            ((I) temp).setI(width/2, cellSize);
+        } else if (figure instanceof J) {
+            temp = new J(context);
+            ((J) temp).setJ(width/2, cellSize);
+        } else if (figure instanceof L) {
+            temp = new L(context);
+            ((L) temp).setL(width/2, cellSize);
+        } else if (figure instanceof T) {
+            temp = new T(context);
+            ((T) temp).setT(width/2, cellSize);
+        } else if (figure instanceof O) {
+            temp = new O(context);
+            ((O) temp).setO(width/2, cellSize);
+        } else if (figure instanceof S) {
+            temp = new S(context);
+            ((S) temp).setS(width/2, cellSize);
+        } else if (figure instanceof Z) {
+            temp = new Z(context);
+            ((Z) temp).setZ(width/2, cellSize);
+        }
+        for (int i = 0; i < temp.positions[0].length; i++){
+            temp.positions[0][i] = figure.positions[0][i];
+            temp.positions[1][i] = figure.positions[1][i];
+        }
+        temp.turn();
+        return temp;
     }
 
     public int[][] getMinAndMaxCoordFigure(){
@@ -464,6 +493,17 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         if (counter!=0)
             return true;
         else return false;
+    }
+
+    public boolean crossesFilledCells(Figure fig){
+        for (int j = 0; j < fig.positions[0].length; j++){
+            for (int i = 0; i < filledCells.size(); i++){
+                if (fig.positions[1][j] + cellSize >= filledCells.get(i).y && fig.positions[1][j] + cellSize < filledCells.get(i).y+cellSize &&
+                        fig.positions[0][j] == filledCells.get(i).x)
+                    return true;
+            }
+        }
+        return false;
     }
 
     private void changeColor () {
