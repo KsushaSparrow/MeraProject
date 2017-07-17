@@ -49,20 +49,20 @@
             android:layout_height="wrap_content"
             android:textSize="32sp"
             android:text="YOUR TOP 5 SCORES"
-            android:textColor="#E52B50"
+            android:textColor="#FFFFFF"
             tools:layout_editor_absoluteX="142dp"
             tools:layout_editor_absoluteY="231dp"
             />
 
         <TextView
             android:id="@+id/allScores"
-            android:textSize="32sp"
+            android:textSize="28sp"
             android:layout_marginTop="-170dip"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#E52B50"
+            android:textColor="#FFFFFF"
             android:text=""
             tools:layout_editor_absoluteX="142dp"
             tools:layout_editor_absoluteY="231dp" />

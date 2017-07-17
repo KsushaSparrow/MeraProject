@@ -46,11 +46,12 @@
             android:text=" "></TextView>
         <TextView
             android:id="@+id/gameOver"
-            android:layout_marginTop="-150dip"
+            android:layout_marginTop="-190dip"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="32sp"
             android:text="GAME OVER"
             android:textColor="#FFFFFF"
             tools:layout_editor_absoluteX="8dp"
@@ -58,7 +59,7 @@
             ></TextView>
         <Button
             android:id="@+id/buttonStartAgain"
-            android:layout_marginTop="-50dip"
+            android:layout_marginTop="-100dip"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/textView1"
             android:layout_width="wrap_content"
@@ -67,11 +68,22 @@
             android:text="START AGAIN"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="8dp" />
+        <Button
+            android:id="@+id/buttonMenu"
+            android:layout_marginTop="1dip"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickStartMenu"
+            android:text="MENU"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="8dp" />
 
 
         <Button
             android:id="@+id/buttonToScores"
-            android:layout_marginTop="1dip"
+            android:layout_marginTop="-50dip"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/textView1"
             android:layout_width="wrap_content"

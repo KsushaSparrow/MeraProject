@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class GameOver extends AppCompatActivity implements View.OnClickListener{
+public class GameOver extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,25 +21,22 @@ public class GameOver extends AppCompatActivity implements View.OnClickListener{
             }
         });
 
-        Button buttonExit = (Button) findViewById(R.id.buttonToScores);
-        buttonExit.setOnClickListener(new View.OnClickListener() {
+        Button buttonScores = (Button) findViewById(R.id.buttonToScores);
+        buttonScores.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onClickToScores();
             }
         });
-    }
 
-    @Override
-    public void onClick(View v){
-        switch (v.getId()){
-            case R.id.buttonStartAgain:
-                onClickStartAgain();
-                break;
-            case R.id.buttonToScores:
-                onClickToScores();
-                break;
-        }
+        Button buttonMenu = (Button) findViewById(R.id.buttonMenu);
+        buttonMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickMenu();
+            }
+        });
+
     }
 
     public void onClickStartAgain(){
@@ -51,6 +48,13 @@ public class GameOver extends AppCompatActivity implements View.OnClickListener{
 
     public void onClickToScores(){
         Intent i = new Intent(this, ScoresActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivityIfNeeded(i, 0);
+        this.finish();
+    }
+
+    public void onClickMenu(){
+        Intent i = new Intent(this, MainActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivityIfNeeded(i, 0);
         this.finish();

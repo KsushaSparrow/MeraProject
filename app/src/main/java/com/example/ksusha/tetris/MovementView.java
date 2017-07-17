@@ -364,7 +364,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             ((L) figure).setL(width / 2, cellSize);
         } else if (random.equals(Figures.BONUS)) {
             bonusCounter++;
-            if (bonusCounter > 10){
+            if (bonusCounter > 15){
                 bonusLaunched = false;
                 bonusCounter = 0;
             }
