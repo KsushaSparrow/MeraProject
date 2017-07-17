@@ -10,11 +10,11 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_centerInParent="true"
-        android:gravity="center"
+        android:gravity="left"
         android:background="#FFFFFF"
         android:textColor="#E52B50"
         android:textAlignment="gravity"
-        android:textSize="32dip"/>
+        android:textSize="28dip"/>
 
     <TextView
         android:id="@+id/text_topic1"
@@ -127,12 +127,13 @@
 
     <ImageView
         android:id="@+id/arrowDown"
-        android:layout_width="20dp"
-        android:layout_height="15dp"
-        android:layout_centerInParent="true"
+        android:layout_width="35dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="165dp"
+        android:layout_marginTop="225dp"
         android:background="#FFFFFF"
         android:scaleType="centerCrop"
-        android:src="@drawable/arrow_down"/>
+        android:src="@drawable/hand_down"/>
 
     <ImageView
         android:id="@+id/afterReduce"

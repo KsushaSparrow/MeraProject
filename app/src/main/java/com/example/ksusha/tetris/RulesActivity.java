@@ -112,8 +112,8 @@ public void onCreate(Bundle savedInstanceState) {
     textView = (TextView) page.findViewById(R.id.text_topic1);
     textView.setText("Gestures");
     TextView textView1 = (TextView) page.findViewById(R.id.text_view);
-    textView1.setText("Tap on a figure to turn it"+"\n"+"Swipe right to move a figure to the right"+"\n"+"Swipe left to move a figure to the left"
-            +"\n"+"Swipe down to speed a figure up");
+    textView1.setText("\n\n\n" + "►Tap on a figure to turn it"+"\n"+"►Swipe right to move a figure to the right"+"\n"+"►Swipe left to move a figure to the left"
+            +"\n"+"►Swipe down to speed a figure up");
     ImageView arrowRight = (ImageView) page.findViewById(R.id.arrowRight);
     arrowRight.setVisibility(View.INVISIBLE);
     textView2 = (TextView) page.findViewById(R.id.description2);

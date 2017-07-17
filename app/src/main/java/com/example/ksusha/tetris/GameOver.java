@@ -43,7 +43,7 @@ public class GameOver extends AppCompatActivity implements View.OnClickListener{
     }
 
     public void onClickStartAgain(){
-        Intent i = new Intent(this, MainActivity.class);
+        Intent i = new Intent(this, GameActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivityIfNeeded(i, 0);
         this.finish();

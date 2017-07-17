@@ -41,6 +41,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
 
     private boolean gotFocusOnce = false;
     int divideBy = 10;
+    int bonusCounter = 0;
+    boolean bonusLaunched = false;
 
     private Matrix translate;
     private GestureDetector gestures;
@@ -115,9 +117,9 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                 float diffY = e2.getY() - e1.getY();
                 float diffX = e2.getX() - e1.getX();
                 if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                    if (diffX > 0 && !figureIsOverSide()) {
+                    if (diffX > 0 && !figureIsOverSideRight() && !reachedFilledCell(figure, cellSize)) {
                         onSwipeRight();
-                    } else if (diffX <= 0 && !figureIsOverSide()){
+                    } else if (diffX <= 0 && !figureIsOverSideLeft() && !reachedFilledCell(figure, -cellSize)){
                             onSwipeLeft();
                         }
                         result = true;
@@ -156,10 +158,10 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             boolean reachedFilledCell = reachedFilledCell(figure, 0);
             if (touchInsideFigure(event.getX(), event.getY()) && !reachedFilledCell){
                 figure.turn();
-            } else if (event.getX() >= width/2 && !figureIsOverSide() && !reachedFilledCell(figure, cellSize)) {
+            } else if (event.getX() >= width/2 && !figureIsOverSideRight() && !reachedFilledCell(figure, cellSize)) {
                 for (int i = 0; i < figure.positions[0].length; i++)
                     figure.positions[0][i] += cellSize;
-            } else if (event.getX() < width/2 && !figureIsOverSide() && !reachedFilledCell(figure, cellSize)){
+            } else if (event.getX() < width/2 && !figureIsOverSideLeft() && !reachedFilledCell(figure, -cellSize)){
                 for (int i = 0; i < figure.positions[0].length; i++)
                     figure.positions[0][i] -= cellSize;
             }
@@ -239,9 +241,17 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         }
     }
 
-    public boolean figureIsOverSide(){
+    public boolean figureIsOverSideRight(){
         for (int i = 0; i < figure.positions[0].length; i++){
-            if (figure.positions[0][i] + cellSize >= width || figure.positions[0][i] - cellSize <=0)
+            if (figure.positions[0][i] + cellSize >= width)
+                return true;
+        }
+        return false;
+    }
+
+    public boolean figureIsOverSideLeft(){
+        for (int i = 0; i < figure.positions[0].length; i++){
+            if (figure.positions[0][i] - cellSize <=0)
                 return true;
         }
         return false;
@@ -292,43 +302,52 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                         yPositionsOfFigure[j] = reachedCellParameters.newValues[1] + deltaY;
                     }
                     reduce(yPositionsOfFigure);
-                    rectanglePaint.setColor(pickRandomColor());
-                    Figures random = pickRandomFigure();
-                    if (random.equals(Figures.J)) {
-                        figure = new J(context);
-                        ((J) figure).setJ(width / 2, cellSize);
-                    } else if (random.equals(Figures.I)) {
-                        figure = new I(context);
-                        ((I) figure).setI(width / 2, cellSize);
-                    } else if (random.equals(Figures.Z)) {
-                        figure = new Z(context);
-                        ((Z) figure).setZ(width / 2, cellSize);
-                    } else if (random.equals(Figures.O)) {
-                        figure = new O(context);
-                        ((O) figure).setO(width / 2, cellSize);
-                    } else if (random.equals(Figures.S)) {
-                        figure = new S(context);
-                        ((S) figure).setS(width / 2, cellSize);
-                    } else if (random.equals(Figures.T)) {
-                        figure = new T(context);
-                        ((T) figure).setT(width / 2, cellSize);
-                    } else if (random.equals(Figures.L)) {
-                        figure = new L(context);
-                        ((L) figure).setL(width / 2, cellSize);
-                    } else if (random.equals(Figures.BONUS)) {
-                        figure = new BonusFigure(context);
-                        ((BonusFigure) figure).setBonusFigure(width / 2, cellSize);
-                        rectanglePaint.setColor(Color.MAGENTA);
-                        BonusColorThread bonusThread = new BonusColorThread(this);
-                        bonusThread.start();
-                   //     changeColor();
-                    //    BackgroundBonusThread backgroundBonusThread = new BackgroundBonusThread(this);
-                     //   backgroundBonusThread.setRunning(true);
-                      //  backgroundBonusThread.start();
-                    }
+                    setRandomFigure();
                     finishedProcessing = true;
                 }
                 finishedProcessing = true;
+        }
+    }
+
+    public void setRandomFigure(){
+        rectanglePaint.setColor(pickRandomColor());
+        Figures random = pickRandomFigure();
+        if (random.equals(Figures.J)) {
+            figure = new J(context);
+            ((J) figure).setJ(width / 2, cellSize);
+        } else if (random.equals(Figures.I)) {
+            figure = new I(context);
+            ((I) figure).setI(width / 2, cellSize);
+        } else if (random.equals(Figures.Z)) {
+            figure = new Z(context);
+            ((Z) figure).setZ(width / 2, cellSize);
+        } else if (random.equals(Figures.O)) {
+            figure = new O(context);
+            ((O) figure).setO(width / 2, cellSize);
+        } else if (random.equals(Figures.S)) {
+            figure = new S(context);
+            ((S) figure).setS(width / 2, cellSize);
+        } else if (random.equals(Figures.T)) {
+            figure = new T(context);
+            ((T) figure).setT(width / 2, cellSize);
+        } else if (random.equals(Figures.L)) {
+            figure = new L(context);
+            ((L) figure).setL(width / 2, cellSize);
+        } else if (random.equals(Figures.BONUS)) {
+            bonusCounter++;
+            if (bonusCounter > 10){
+                bonusLaunched = false;
+                bonusCounter = 0;
+            }
+            if (!bonusLaunched) {
+                bonusLaunched = true;
+                figure = new BonusFigure(context);
+                ((BonusFigure) figure).setBonusFigure(width / 2, cellSize);
+                rectanglePaint.setColor(Color.MAGENTA);
+                BonusColorThread bonusThread = new BonusColorThread(this);
+                bonusThread.start();
+            }
+            else setRandomFigure();
         }
     }
     //reduces filled lines
@@ -434,13 +453,17 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     public boolean reachedFilledCell(Figure figure, int deltaX){
+        int counter = 0;
         for (int i = 0; i < figure.positions[0].length; i++){
             for (int j = 0; j < filledCells.toArray().length; j++){
-                if (figure.positions[1][i] >= filledCells.get(j).y && figure.positions[0][i] == (filledCells.get(j).x + deltaX))
-                    return true;
+                if (figure.positions[1][i] >= filledCells.get(j).y && figure.positions[0][i] + deltaX == (filledCells.get(j).x)
+                        && figure.positions[1][i] < filledCells.get(j).y+cellSize)
+                    counter++;
             }
         }
-        return false;
+        if (counter!=0)
+            return true;
+        else return false;
     }
 
     private void changeColor () {
