@@ -157,7 +157,8 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         public boolean onSingleTapConfirmed(MotionEvent event){
             boolean reachedFilledCell = reachedFilledCell(figure, 0);
             if (touchInsideFigure(event.getX(), event.getY()) && !reachedFilledCell){
-                if (!crossesFilledCells(getTurnedFigure()))
+                Figure fig = getTurnedFigure();
+                if (!crossesFilledCells(fig) && !figureIsOverSideRight(fig) && !figureIsOverSideLeft(fig))
                     figure.turn();
             } else if (event.getX() >= width/2 && !figureIsOverSideRight() && !reachedFilledCell(figure, cellSize)) {
                 for (int i = 0; i < figure.positions[0].length; i++)
@@ -281,6 +282,22 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     public boolean figureIsOverSideLeft(){
         for (int i = 0; i < figure.positions[0].length; i++){
             if (figure.positions[0][i] - cellSize <=0)
+                return true;
+        }
+        return false;
+    }
+
+    public boolean figureIsOverSideRight(Figure fig){
+        for (int i = 0; i < fig.positions[0].length; i++){
+            if (fig.positions[0][i] + cellSize >= width)
+                return true;
+        }
+        return false;
+    }
+
+    public boolean figureIsOverSideLeft(Figure fig){
+        for (int i = 0; i < fig.positions[0].length; i++){
+            if (fig.positions[0][i] - cellSize <=0)
                 return true;
         }
         return false;
