@@ -48,22 +48,6 @@ public class ScoresActivity extends AppCompatActivity {
                 text.setText(text.getText() + "\n" + counter + ". " + line);
                 line = reader.readLine();
             }
-
-            /*
-            InputStreamReader isr = new InputStreamReader(fIn);
-            char[] inputBuffer = new char[16];
-            isr.read(inputBuffer);
-            String read = new String(inputBuffer);
-                   FileReader fr = new FileReader(scoresFile);
-                    BufferedReader reader = new BufferedReader(fr);
-                    String str;
-                    StringBuffer buffer = new StringBuffer();
-                    while ((str = reader.readLine()) != null){
-                        buffer.append(str + "\n");
-                    }
-                    isr.close();*/
-                //    Toast.makeText(getApplicationContext(), read, Toast.LENGTH_LONG).show();
-
         } catch (Throwable t){
             Toast.makeText(getApplicationContext(), "Exception3: " + t.toString(), Toast.LENGTH_LONG).show();
         }

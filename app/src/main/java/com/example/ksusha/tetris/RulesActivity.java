@@ -34,6 +34,8 @@ public void onCreate(Bundle savedInstanceState) {
     figure8.setVisibility(View.INVISIBLE);
     TextView textView2 = (TextView) page.findViewById(R.id.description2);
     textView2.setVisibility(View.INVISIBLE);
+    TextView textView4 = (TextView) page.findViewById(R.id.description3);
+    textView4.setVisibility(View.INVISIBLE);
     pages.add(page);
 
     page = inflater.inflate(R.layout.screenpager, null);
@@ -59,6 +61,8 @@ public void onCreate(Bundle savedInstanceState) {
     figure8.setVisibility(View.INVISIBLE);
     textView2 = (TextView) page.findViewById(R.id.description2);
     textView2.setVisibility(View.INVISIBLE);
+    textView4 = (TextView) page.findViewById(R.id.description3);
+    textView4.setVisibility(View.INVISIBLE);
     pages.add(page);
 
     page = inflater.inflate(R.layout.screenpager, null);
@@ -85,7 +89,9 @@ public void onCreate(Bundle savedInstanceState) {
     textView = (TextView) page.findViewById(R.id.text_topic1);
     textView.setText("Bonus figure");
     textView2 = (TextView) page.findViewById(R.id.description2);
-    textView2.setText("Your scores will be doubled during 15 seconds after reducing a cell of this figure");
+    textView2.setText("During 15 seconds your scores will be doubled if you reduce any line");
+    textView4 = (TextView) page.findViewById(R.id.description3);
+    textView4.setVisibility(View.INVISIBLE);
     pages.add(page);
 
     page = inflater.inflate(R.layout.screenpager, null);
@@ -111,8 +117,8 @@ public void onCreate(Bundle savedInstanceState) {
     afterReduce.setVisibility(View.INVISIBLE);
     textView = (TextView) page.findViewById(R.id.text_topic1);
     textView.setText("Gestures");
-    TextView textView1 = (TextView) page.findViewById(R.id.text_view);
-    textView1.setText("\n\n\n" + "►Tap on a figure to turn it"+"\n"+"►Swipe right to move a figure to the right"+"\n"+"►Swipe left to move a figure to the left"
+    TextView textView1 = (TextView) page.findViewById(R.id.description3);
+    textView1.setText("►Tap on a figure to turn it"+"\n"+"►Swipe right to move a figure to the right"+"\n"+"►Swipe left to move a figure to the left"
             +"\n"+"►Swipe down to speed a figure up");
     ImageView arrowRight = (ImageView) page.findViewById(R.id.arrowRight);
     arrowRight.setVisibility(View.INVISIBLE);

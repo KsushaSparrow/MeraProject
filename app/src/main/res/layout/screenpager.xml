@@ -180,4 +180,17 @@
         android:textAlignment="gravity"
         android:textSize="28dip"/>
 
+
+    <TextView
+        android:id="@+id/description3"
+        android:layout_width="250dp"
+        android:layout_height="430dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="70dp"
+        android:background="#FFFFFF"
+        android:textColor="#5D8AA8"
+        android:gravity="start"
+        android:textAlignment="gravity"
+        android:textSize="28dip"/>
+
 </RelativeLayout>

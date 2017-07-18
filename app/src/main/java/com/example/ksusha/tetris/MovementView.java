@@ -72,7 +72,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     private Paint rectanglePaint;
 
     UpdateThread updateThread;
-    boolean finishedProcessing = true;
 
     public int numberOfFigures = 0;
     int color = Color.BLACK;
@@ -323,36 +322,33 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     public void updatePhysics() {
-        if (finishedProcessing){
-            finishedProcessing = false;
-                ReachedCellParameters reachedCellParameters = reachedFilledCell();
-                if (!reachedBottom() && !reachedCellParameters.reached) {
-                    updateYofFigure();
-                } else {
-                    if (reachedCellParameters.reached && onTheTop()) {
-                        saveScore();
-                        boolean retry = true;
-                        updateThread.setRunning(false);
-                        Intent intent = new Intent(context, GameOver.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    }
-                //    currentScore = String.valueOf(Integer.valueOf(currentScore)+1);
-                    int[] yPositionsOfFigure = new int[figure.positions[0].length];
-                    int deltaX = 0;
-                    int deltaY = 0;
-                    for (int j = 0; j < figure.positions[0].length; j++) {
-                        deltaX = figure.positions[0][j]-reachedCellParameters.oldValues[0];
-                        deltaY = figure.positions[1][j]-reachedCellParameters.oldValues[1];
-                        filledCells.add(new Coordinate(reachedCellParameters.newValues[0] + deltaX, reachedCellParameters.newValues[1] + deltaY, rectanglePaint));
-                        yPositionsOfFigure[j] = reachedCellParameters.newValues[1] + deltaY;
-                    }
-                    reduce(yPositionsOfFigure);
-                    setRandomFigure();
-                    finishedProcessing = true;
-                }
-                finishedProcessing = true;
+        ReachedCellParameters reachedCellParameters = reachedFilledCell();
+        if (!reachedBottom() && !reachedCellParameters.reached) {
+            updateYofFigure();
+        } else {
+            if (reachedCellParameters.reached && onTheTop()) {
+                saveScore();
+                boolean retry = true;
+                updateThread.setRunning(false);
+                Intent intent = new Intent(context, GameOver.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("score", currentScore);
+                context.startActivity(intent);
+            }
+            //    currentScore = String.valueOf(Integer.valueOf(currentScore)+1);
+            int[] yPositionsOfFigure = new int[figure.positions[0].length];
+            int deltaX = 0;
+            int deltaY = 0;
+            for (int j = 0; j < figure.positions[0].length; j++) {
+                deltaX = figure.positions[0][j] - reachedCellParameters.oldValues[0];
+                deltaY = figure.positions[1][j] - reachedCellParameters.oldValues[1];
+                filledCells.add(new Coordinate(reachedCellParameters.newValues[0] + deltaX, reachedCellParameters.newValues[1] + deltaY, rectanglePaint));
+                yPositionsOfFigure[j] = reachedCellParameters.newValues[1] + deltaY;
+            }
+            reduce(yPositionsOfFigure);
+            setRandomFigure();
         }
+
     }
 
     public void setRandomFigure(){
@@ -391,6 +387,7 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                 ((BonusFigure) figure).setBonusFigure(width / 2, cellSize);
                 rectanglePaint.setColor(Color.MAGENTA);
                 BonusColorThread bonusThread = new BonusColorThread(this);
+                bonusThread.setDaemon(true);
                 bonusThread.start();
             }
             else setRandomFigure();
@@ -523,51 +520,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         return false;
     }
 
-    private void changeColor () {
-        if(!changingColorStarted) {
-            changingColorStarted = true;
-            final float[] from = new float[3];
-            final float[] to = new float[3];
-            Color.colorToHSV(Color.parseColor("#FFFFFFFF"), from);
-            Color.colorToHSV(Color.parseColor("#FFFF0000"), to);
-            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-            anim.setDuration(3000);
-            final float[] hsv = new float[3];
-            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    hsv[0] = from[0] + (to[0] - from[0]) * valueAnimator.getAnimatedFraction();
-                    hsv[1] = from[1] + (to[1] - from[1]) * valueAnimator.getAnimatedFraction();
-                    hsv[2] = from[2] + (to[2] - from[2]) * valueAnimator.getAnimatedFraction();
-
-                    setBackgroundColor(Color.HSVToColor(hsv));
-                    color = Color.TRANSPARENT;
-                }
-            });
-            anim.start();
-    /*
-        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float position = valueAnimator.getAnimatedFraction();
-             //   int blended = blendColors(initialColor, finalColor, position);
-                color = Color.MAGENTA;
-             //   color = blended;
-            }
-        });*/
-        }
-    }
-
-    private  int blendColors (int from, int to, float ratio){
-        final float inverseRatio = 1f - ratio;
-        final float r = Color.red(to)*ratio + Color.red(from)*inverseRatio;
-        final float g = Color.green(to)*ratio + Color.green(from)*inverseRatio;
-        final float b = Color.blue(to)*ratio + Color.blue(from)*inverseRatio;
-        return Color.rgb((int)r, (int)g, (int)b);
-    }
-
     public void saveScore(){
         boolean addedScore = false;
         ArrayList<Integer> scores = getPreviousSortedScores();
@@ -583,27 +535,29 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
             }
         }
 
-        File scoresFile = new File(context.getFilesDir(), FILE_NAME);
-        if(!scoresFile.exists()) {
+        if (addedScore) {
+            File scoresFile = new File(context.getFilesDir(), FILE_NAME);
+            if (!scoresFile.exists()) {
+                try {
+                    scoresFile.createNewFile();
+                } catch (Exception e1) {
+                    Toast.makeText(context.getApplicationContext(), "Exception1: " + e1.toString(), Toast.LENGTH_LONG).show();
+                }
+            }
+            Collections.sort(scores, new ScoresComparator());
             try {
-                scoresFile.createNewFile();
-            } catch (Exception e1) {
-                Toast.makeText(context.getApplicationContext(), "Exception1: " + e1.toString(), Toast.LENGTH_LONG).show();
+                PrintWriter writer = new PrintWriter(scoresFile);
+                writer.print("");
+                for (int i = 0; i < scores.size(); i++) {
+                    if (i < scores.size() - 1)
+                        writer.println(scores.get(i));
+                    else
+                        writer.print(scores.get(scores.size() - 1));
+                }
+                writer.close();
+            } catch (Exception e) {
+                Toast.makeText(context.getApplicationContext(), "Exception2: " + e.toString(), Toast.LENGTH_LONG).show();
             }
-        }
-        Collections.sort(scores, new ScoresComparatorReverse());//change this
-        try {
-            PrintWriter writer = new PrintWriter(scoresFile);
-            writer.print("");
-            for (int i = 0; i < scores.size(); i++) {
-                if (i < scores.size()-1)
-                    writer.println(scores.get(i));
-                else
-                    writer.print(scores.get(scores.size()-1));
-            }
-            writer.close();
-        } catch (Exception e){
-            Toast.makeText(context.getApplicationContext(), "Exception2: " + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -625,13 +579,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
                 scores.add(Integer.valueOf(line));
                 line = reader.readLine();
             }
-
-        /*    InputStreamReader isr = new InputStreamReader(fIn);
-            char[] inputBuffer = new char[16];
-            isr.read(inputBuffer);
-            String read = new String(inputBuffer);
-
-            isr.close();*/
         } catch (Throwable t){
             Toast.makeText(context, "Exception3: " + t.toString(), Toast.LENGTH_LONG).show();
         }
@@ -645,12 +592,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         }
     }
 
-    public class ScoresComparatorReverse implements Comparator<Integer>{
-        public int compare(Integer first, Integer second){
-            return (1-first.compareTo(second));
-        }
-    }
-
     public void surfaceCreated(SurfaceHolder holder){
         Rect surfaceFrame = holder.getSurfaceFrame();
         width = surfaceFrame.width();
@@ -660,14 +601,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         int temp1 = cellSize/2;
         if (temp != 2*temp1)
             cellSize += 1;
-    /*    fileFullName = context.getFilesDir() + "/" + FILE_NAME;
-        fileScores = new File(fileFullName);
-        try{
-            fileScores.createNewFile();
-        } catch (IOException ex){
-            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-        readScores();*/
     }
 
     @Override
@@ -697,10 +630,6 @@ public class MovementView extends SurfaceView implements SurfaceHolder.Callback,
         while(retry){
             try{
                 updateThread.join();
-            //    Intent intent = new Intent(context, GameOver.class);
-             //   intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-              //  context.startActivity(intent);
-            //    saveScore();
                 retry = false;
             } catch (InterruptedException e){
 
